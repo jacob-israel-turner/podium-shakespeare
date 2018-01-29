@@ -8,7 +8,8 @@ class App extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      reviews: null
+      reviews: null,
+      selectedReview: null
     }
     autobind(this)
   }
@@ -18,14 +19,32 @@ class App extends Component {
     this.setState({ reviews })
   }
 
+  async openReview (id) {
+    const { data: { data: selectedReview } } = await http.get(`/reviews/${id}`)
+    this.setState({ selectedReview })
+  }
+
   componentDidMount () {
     this.getReviews()
   }
 
   render () {
+    console.log(this.state);
     let content
     if (this.state.reviews) {
-      content = <div>{this.state.reviews.map(review => <div key={review.id}>{getStarsFromRating(review.rating)}</div>)}</div>
+      content = <div>{this.state.reviews.map(review => {
+        let selectedContent
+        if (this.state.selectedReview && review.id === this.state.selectedReview.id) {
+          selectedContent = <div>{this.state.selectedReview.body}</div>
+        }
+        let row = (
+          <div key={review.id}>
+            <div onClick={this.openReview.bind(null, review.id)}>{getStarsFromRating(review.rating)} - "{review.author}"</div>
+            {selectedContent}
+          </div>
+        )
+        return row
+      })}</div>
     } else {
       content = <div>Loading...</div>
     }
