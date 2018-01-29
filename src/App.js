@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import autobind from 'react-autobind'
+import moment from 'moment'
 
 import './App.css'
 import http from './helpers/http'
@@ -29,17 +30,23 @@ class App extends Component {
   }
 
   render () {
-    console.log(this.state);
     let content
     if (this.state.reviews) {
-      content = <div>{this.state.reviews.map(review => {
+      content = <div className="content-container">{this.state.reviews.map(review => {
         let selectedContent
+        let rowClassName = 'review-container'
         if (this.state.selectedReview && review.id === this.state.selectedReview.id) {
-          selectedContent = <div>{this.state.selectedReview.body}</div>
+          selectedContent = (
+            <div>
+              <div className="selected-date">{moment(this.state.selectedReview.publish_date).fromNow()}</div>    
+              <p className="selected-review-body">{this.state.selectedReview.body}</p>
+            </div>
+          )
+          rowClassName += ' selected-review'
         }
         let row = (
-          <div key={review.id}>
-            <div onClick={this.openReview.bind(null, review.id)}>{getStarsFromRating(review.rating)} - "{review.author}"</div>
+          <div className={rowClassName} onClick={this.openReview.bind(null, review.id)} key={review.id}>
+            <div className="review-header">{getStarsFromRating(review.rating)} - "{review.author}"</div>
             {selectedContent}
           </div>
         )
@@ -50,7 +57,7 @@ class App extends Component {
     }
     return (
       <div className="App">
-        <h1>Shakespeare Reviews</h1>
+        <h1 className="title">Shakespeare Reviews</h1>
         {content}
       </div>
     )
@@ -63,6 +70,7 @@ function getStarsFromRating (rating) {
   for (let i = 0; i < stars; i++) {
     returnValue += '⭐'
   }
+  if (returnValue.length === 0) return '😢'
   return returnValue
 }
 
